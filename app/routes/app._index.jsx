@@ -1,238 +1,117 @@
-import { useEffect } from "react";
-import { useFetcher } from "react-router";
+import { useEffect, useState } from "react";
+import { useFetcher, useLoaderData } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
+import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
 
-  return null;
+  // Load settings from database
+  const settings = await prisma.settings.findUnique({
+    where: { id: 'default' }
+  });
+
+  return {
+    moduleStatus: settings?.jetStatusIn ?? true
+  };
 };
 
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
-  ];
-  const response = await admin.graphql(
-    `#graphql
-      mutation populateProduct($product: ProductCreateInput!) {
-        productCreate(product: $product) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
-        }
-      }`,
-    {
-      variables: {
-        product: {
-          title: `${color} Snowboard`,
-        },
-      },
-    },
-  );
-  const responseJson = await response.json();
-  const product = responseJson.data.productCreate.product;
-  const variantId = product.variants.edges[0].node.id;
-  const variantResponse = await admin.graphql(
-    `#graphql
-    mutation shopifyReactRouterTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-        productVariants {
-          id
-          price
-          barcode
-          createdAt
-        }
-      }
-    }`,
-    {
-      variables: {
-        productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
-      },
-    },
-  );
-  const variantResponseJson = await variantResponse.json();
+  const formData = await request.formData();
+  const action = formData.get("action");
 
-  return {
-    product: responseJson.data.productCreate.product,
-    variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
-  };
+  switch (action) {
+    case "toggle_module":
+      const status = formData.get("status") === "true";
+
+      // Update settings in database
+      await prisma.settings.update({
+        where: { id: 'default' },
+        data: { jetStatusIn: status }
+      });
+
+      return { success: true, moduleStatus: status };
+
+    default:
+      return { success: false, error: "Unknown action" };
+  }
 };
 
 export default function Index() {
   const fetcher = useFetcher();
   const shopify = useAppBridge();
-  const isLoading =
-    ["loading", "submitting"].includes(fetcher.state) &&
-    fetcher.formMethod === "POST";
+  const { moduleStatus: initialModuleStatus } = useLoaderData();
+  const [moduleStatus, setModuleStatus] = useState(initialModuleStatus);
 
   useEffect(() => {
-    if (fetcher.data?.product?.id) {
-      shopify.toast.show("Product created");
+    if (fetcher.data?.success) {
+      shopify.toast.show("Settings updated successfully");
+      // Update local state when database is updated
+      if (fetcher.data.moduleStatus !== undefined) {
+        setModuleStatus(fetcher.data.moduleStatus);
+      }
     }
-  }, [fetcher.data?.product?.id, shopify]);
-  const generateProduct = () => fetcher.submit({}, { method: "POST" });
+  }, [fetcher.data?.success, fetcher.data?.moduleStatus, shopify]);
+
+  const toggleModuleStatus = () => {
+    const newStatus = !moduleStatus;
+    setModuleStatus(newStatus);
+    fetcher.submit(
+      { action: "toggle_module", status: newStatus },
+      { method: "POST" }
+    );
+  };
 
   return (
-    <s-page heading="Shopify app template">
-      <s-button slot="primary-action" onClick={generateProduct}>
-        Generate a product
+    <s-page heading="JetCredit Overview">
+      <s-button
+        slot="primary-action"
+        onClick={toggleModuleStatus}
+        {...(fetcher.state === "submitting" ? { loading: true } : {})}
+      >
+        {moduleStatus ? "Изключи модула" : "Включи модула"}
       </s-button>
 
-      <s-section heading="Congrats on creating a new Shopify app 🎉">
+      <s-section heading="JetCredit - Финансиране с Пощенска банка">
         <s-paragraph>
-          This embedded app template uses{" "}
-          <s-link
-            href="https://shopify.dev/docs/apps/tools/app-bridge"
-            target="_blank"
-          >
-            App Bridge
-          </s-link>{" "}
-          interface examples like an{" "}
-          <s-link href="/app/additional">additional page in the app nav</s-link>
-          , as well as an{" "}
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql"
-            target="_blank"
-          >
-            Admin GraphQL
-          </s-link>{" "}
-          mutation demo, to provide a starting point for app development.
-        </s-paragraph>
-      </s-section>
-      <s-section heading="Get started with products">
-        <s-paragraph>
-          Generate a product with GraphQL and get the JSON output for that
-          product. Learn more about the{" "}
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-            target="_blank"
-          >
-            productCreate
-          </s-link>{" "}
-          mutation in our API references.
-        </s-paragraph>
-        <s-stack direction="inline" gap="base">
-          <s-button
-            onClick={generateProduct}
-            {...(isLoading ? { loading: true } : {})}
-          >
-            Generate a product
-          </s-button>
-          {fetcher.data?.product && (
-            <s-button
-              onClick={() => {
-                shopify.intents.invoke?.("edit:shopify/Product", {
-                  value: fetcher.data?.product?.id,
-                });
-              }}
-              target="_blank"
-              variant="tertiary"
-            >
-              Edit product
-            </s-button>
-          )}
-        </s-stack>
-        {fetcher.data?.product && (
-          <s-section heading="productCreate mutation">
-            <s-stack direction="block" gap="base">
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="subdued"
-              >
-                <pre style={{ margin: 0 }}>
-                  <code>{JSON.stringify(fetcher.data.product, null, 2)}</code>
-                </pre>
-              </s-box>
-
-              <s-heading>productVariantsBulkUpdate mutation</s-heading>
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="subdued"
-              >
-                <pre style={{ margin: 0 }}>
-                  <code>{JSON.stringify(fetcher.data.variant, null, 2)}</code>
-                </pre>
-              </s-box>
-            </s-stack>
-          </s-section>
-        )}
-      </s-section>
-
-      <s-section slot="aside" heading="App template specs">
-        <s-paragraph>
-          <s-text>Framework: </s-text>
-          <s-link href="https://reactrouter.com/" target="_blank">
-            React Router
-          </s-link>
+          <s-badge tone={moduleStatus ? "success" : "critical"}>
+            {moduleStatus ? "Активен модул" : "Неактивен модул"}
+          </s-badge>
         </s-paragraph>
         <s-paragraph>
-          <s-text>Interface: </s-text>
-          <s-link
-            href="https://shopify.dev/docs/api/app-home/using-polaris-components"
-            target="_blank"
-          >
-            Polaris web components
-          </s-link>
+          JetCredit е специализиран модул за интеграция с Пощенска банка,
+          който позволява на вашите клиенти да пазаруват на кредит директно
+          през вашия Shopify магазин.
         </s-paragraph>
         <s-paragraph>
-          <s-text>API: </s-text>
-          <s-link
-            href="https://shopify.dev/docs/api/admin-graphql"
-            target="_blank"
-          >
-            GraphQL
-          </s-link>
-        </s-paragraph>
-        <s-paragraph>
-          <s-text>Database: </s-text>
-          <s-link href="https://www.prisma.io/" target="_blank">
-            Prisma
-          </s-link>
+          Модулът автоматично изчислява месечните вноски, прилага индивидуални
+          лихвени проценти и осигурява безпроблемно прехвърляне на поръчките
+          към системата на банката.
         </s-paragraph>
       </s-section>
 
-      <s-section slot="aside" heading="Next steps">
-        <s-unordered-list>
-          <s-list-item>
-            Build an{" "}
-            <s-link
-              href="https://shopify.dev/docs/apps/getting-started/build-app-example"
-              target="_blank"
-            >
-              example app
-            </s-link>
-          </s-list-item>
-          <s-list-item>
-            Explore Shopify&apos;s API with{" "}
-            <s-link
-              href="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-              target="_blank"
-            >
-              GraphiQL
-            </s-link>
-          </s-list-item>
-        </s-unordered-list>
+      <s-section heading="Основни характеристики">
+        <s-paragraph>
+          ✓ Автоматично изчисляване на месечни вноски<br />
+          ✓ Индивидуални лихвени проценти по продукти<br />
+          ✓ Интеграция с банкова система за одобрение<br />
+          ✓ Безопасно предаване на данни<br />
+          ✓ Поддръжка на различни срокове за погасяване (6-30 месеца)<br />
+          ✓ Автоматична актуализация на наличности
+        </s-paragraph>
+      </s-section>
+
+      <s-section slot="aside" heading="Бързи действия">
+        <s-button
+          onClick={toggleModuleStatus}
+          {...(fetcher.state === "submitting" ? { loading: true } : {})}
+          style={{ width: "100%", marginBottom: "8px" }}
+        >
+          {moduleStatus ? "Изключи модула" : "Включи модула"}
+        </s-button>
       </s-section>
     </s-page>
   );
