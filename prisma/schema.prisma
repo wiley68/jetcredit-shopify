@@ -14,21 +14,47 @@ datasource db {
 }
 
 model Session {
-  id            String    @id
-  shop          String
-  state         String
-  isOnline      Boolean   @default(false)
-  scope         String?
-  expires       DateTime?
-  accessToken   String
-  userId        BigInt?
-  firstName     String?
-  lastName      String?
-  email         String?
-  accountOwner  Boolean   @default(false)
-  locale        String?
-  collaborator  Boolean?  @default(false)
-  emailVerified Boolean?  @default(false)
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
   refreshToken        String?
   refreshTokenExpires DateTime?
+}
+
+model Settings {
+  id               String  @id @default("default")
+  jetStatusIn      Boolean @default(true)
+  jetEmail         String  @default("online.shop@pbpf.bg")
+  jetId            String  @default("")
+  jetPurcent       Float   @default(1.40)
+  jetVnoskiDefault Int     @default(12)
+  jetCardIn        Boolean @default(true)
+  jetPurcentCard   Float   @default(1.00)
+  jetCount         String  @default("")
+  jetMinprice      Int     @default(150)
+  jetEur           Int     @default(0)
+}
+
+model Filters {
+  id                Int      @id @default(autoincrement())
+  jetProductId      String // Shopify Product ID (gid://shopify/Product/...) или "*" за всички продукти
+  jetProductPercent Float    @default(0.00)
+  jetProductMeseci  String // Format: "6_12_30" - months separated by underscore
+  jetProductPrice   Float    @default(0) // Minimum price for activation (0 = for all prices)
+  jetProductStart   DateTime // Start date of the filter
+  jetProductEnd     DateTime // End date of the filter
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
