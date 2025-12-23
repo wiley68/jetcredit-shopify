@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 import { useFetcher, useLoaderData } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { useTranslation } from "react-i18next";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { getModuleStatus, toggleModuleStatus } from "../models/Settings.server";
 
 export const loader = async ({ request }) => {
-  await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
 
   // Load module status from database
   const moduleStatus = await getModuleStatus();
 
+  // Get shop locale from session
+  const shopLocale = session?.locale || 'en';
+
   return {
-    moduleStatus
+    moduleStatus,
+    shopLocale
   };
 };
 
@@ -38,18 +43,19 @@ export const action = async ({ request }) => {
 export default function Index() {
   const fetcher = useFetcher();
   const shopify = useAppBridge();
+  const { t } = useTranslation();
   const { moduleStatus: initialModuleStatus } = useLoaderData();
   const [moduleStatus, setModuleStatus] = useState(initialModuleStatus);
 
   useEffect(() => {
     if (fetcher.data?.success) {
-      shopify.toast.show("Settings updated successfully");
+      shopify.toast.show(t('settings.updated_successfully'));
       // Update local state when database is updated
       if (fetcher.data.moduleStatus !== undefined) {
         setModuleStatus(fetcher.data.moduleStatus);
       }
     }
-  }, [fetcher.data?.success, fetcher.data?.moduleStatus, shopify]);
+  }, [fetcher.data?.success, fetcher.data?.moduleStatus, shopify, t]);
 
   const toggleModuleStatus = () => {
     const newStatus = !moduleStatus;
@@ -61,51 +67,47 @@ export default function Index() {
   };
 
   return (
-    <s-page heading="JetCredit Overview">
+    <s-page heading={t('overview.title')}>
       <s-button
         slot="primary-action"
         onClick={toggleModuleStatus}
         {...(fetcher.state === "submitting" ? { loading: true } : {})}
       >
-        {moduleStatus ? "Изключи модула" : "Включи модула"}
+        {moduleStatus ? t('overview.toggle.disable_module') : t('overview.toggle.enable_module')}
       </s-button>
 
-      <s-section heading="JetCredit - Финансиране с Пощенска банка">
+      <s-section heading={t('app.title')}>
         <s-paragraph>
           <s-badge tone={moduleStatus ? "success" : "critical"}>
-            {moduleStatus ? "Активен модул" : "Неактивен модул"}
+            {moduleStatus ? t('overview.module_active') : t('overview.module_inactive')}
           </s-badge>
         </s-paragraph>
         <s-paragraph>
-          JetCredit е специализиран модул за интеграция с Пощенска банка,
-          който позволява на вашите клиенти да пазаруват на кредит директно
-          през вашия Shopify магазин.
+          {t('overview.description')}
         </s-paragraph>
         <s-paragraph>
-          Модулът автоматично изчислява месечните вноски, прилага индивидуални
-          лихвени проценти и осигурява безпроблемно прехвърляне на поръчките
-          към системата на банката.
+          {t('overview.description_extended')}
         </s-paragraph>
       </s-section>
 
-      <s-section heading="Основни характеристики">
+      <s-section heading={t('overview.features.title')}>
         <s-paragraph>
-          ✓ Автоматично изчисляване на месечни вноски<br />
-          ✓ Индивидуални лихвени проценти по продукти<br />
-          ✓ Интеграция с банкова система за одобрение<br />
-          ✓ Безопасно предаване на данни<br />
-          ✓ Поддръжка на различни срокове за погасяване (6-30 месеца)<br />
-          ✓ Автоматична актуализация на наличности
+          ✓ {t('overview.features.auto_calculation')}<br />
+          ✓ {t('overview.features.individual_rates')}<br />
+          ✓ {t('overview.features.bank_integration')}<br />
+          ✓ {t('overview.features.secure_data')}<br />
+          ✓ {t('overview.features.terms_support')}<br />
+          ✓ {t('overview.features.inventory_update')}
         </s-paragraph>
       </s-section>
 
-      <s-section slot="aside" heading="Бързи действия">
+      <s-section slot="aside" heading={t('overview.quick_actions.title')}>
         <s-button
           onClick={toggleModuleStatus}
           {...(fetcher.state === "submitting" ? { loading: true } : {})}
-          style={{ width: "100%", marginBottom: "8px" }}
+          style={{ width: "100%" }}
         >
-          {moduleStatus ? "Изключи модула" : "Включи модула"}
+          {moduleStatus ? t('overview.toggle.disable_module') : t('overview.toggle.enable_module')}
         </s-button>
       </s-section>
     </s-page>

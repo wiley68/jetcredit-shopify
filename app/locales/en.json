@@ -1,0 +1,57 @@
+{
+    "app": {
+        "title": "JetCredit",
+        "navigation": {
+            "overview": "Overview",
+            "loan_calculator": "Loan Calculator"
+        }
+    },
+    "common": {
+        "language": "Language",
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "overview": {
+        "title": "JetCredit Overview",
+        "module_active": "Active Module",
+        "module_inactive": "Inactive Module",
+        "description": "JetCredit is a specialized module for integration with PostBank, which allows your customers to shop on credit directly through your Shopify store.",
+        "description_extended": "The module automatically calculates monthly installments, applies individual interest rates, and ensures seamless transfer of orders to the bank's system.",
+        "features": {
+            "title": "Key Features",
+            "auto_calculation": "Automatic calculation of monthly installments",
+            "individual_rates": "Individual interest rates per product",
+            "bank_integration": "Integration with bank approval system",
+            "secure_data": "Secure data transmission",
+            "terms_support": "Support for different repayment terms (6-30 months)",
+            "inventory_update": "Automatic inventory updates"
+        },
+        "quick_actions": {
+            "title": "Quick Actions"
+        },
+        "system_status": {
+            "title": "System Status",
+            "bank_integration": "Bank Integration",
+            "api_keys": "API Keys",
+            "database": "Database",
+            "connected": "Connected successfully",
+            "valid_until": "Valid until",
+            "last_sync": "Last sync",
+            "ago": "ago"
+        },
+        "recent_activity": {
+            "title": "Recent Activity",
+            "loan_approved": "Loan approved for"
+        },
+        "toggle": {
+            "enable_module": "Enable Module",
+            "disable_module": "Disable Module"
+        }
+    },
+    "settings": {
+        "updated_successfully": "Settings updated successfully"
+    }
+}

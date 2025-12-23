@@ -1,4 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import "./i18n";
+import LocaleInitializer from "./components/LocaleInitializer";
 
 export default function App() {
   return (
@@ -15,6 +17,7 @@ export default function App() {
         <Links />
       </head>
       <body>
+        <LocaleInitializer />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
