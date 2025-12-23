@@ -3,18 +3,16 @@ import { useFetcher, useLoaderData } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
+import { getModuleStatus, toggleModuleStatus } from "../models/Settings.server";
 
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
 
-  // Load settings from database
-  const settings = await prisma.settings.findUnique({
-    where: { id: 'default' }
-  });
+  // Load module status from database
+  const moduleStatus = await getModuleStatus();
 
   return {
-    moduleStatus: settings?.jetStatusIn ?? true
+    moduleStatus
   };
 };
 
@@ -27,11 +25,8 @@ export const action = async ({ request }) => {
     case "toggle_module":
       const status = formData.get("status") === "true";
 
-      // Update settings in database
-      await prisma.settings.update({
-        where: { id: 'default' },
-        data: { jetStatusIn: status }
-      });
+      // Update module status in database
+      await toggleModuleStatus(status);
 
       return { success: true, moduleStatus: status };
 
