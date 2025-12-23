@@ -7,13 +7,17 @@ import { authenticate } from "../shopify.server";
 import { getSettings, updateAllSettings } from "../models/Settings.server";
 
 export const loader = async ({ request }) => {
-    await authenticate.admin(request);
+    const { session } = await authenticate.admin(request);
 
     // Load current settings
     const settings = await getSettings();
 
+    // Get shop locale from session
+    const shopLocale = session?.locale || 'en';
+
     return {
-        settings
+        settings,
+        shopLocale
     };
 };
 
@@ -44,8 +48,20 @@ export const action = async ({ request }) => {
 export default function Settings() {
     const fetcher = useFetcher();
     const shopify = useAppBridge();
-    const { t } = useTranslation();
-    const { settings: initialSettings } = useLoaderData();
+    const { t, i18n } = useTranslation();
+    const { settings: initialSettings, shopLocale } = useLoaderData();
+
+    // Initialize language based on shop locale
+    useEffect(() => {
+        if (shopLocale) {
+            const normalizedLocale = shopLocale.split('-')[0].toLowerCase();
+            const supportedLocale = ['en', 'bg'].includes(normalizedLocale) ? normalizedLocale : 'en';
+
+            if (i18n.language !== supportedLocale) {
+                i18n.changeLanguage(supportedLocale);
+            }
+        }
+    }, [shopLocale, i18n]);
 
     const [formData, setFormData] = useState({
         jetStatusIn: initialSettings.jetStatusIn ?? true,

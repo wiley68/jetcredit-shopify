@@ -43,8 +43,20 @@ export const action = async ({ request }) => {
 export default function Index() {
   const fetcher = useFetcher();
   const shopify = useAppBridge();
-  const { t } = useTranslation();
-  const { moduleStatus: initialModuleStatus } = useLoaderData();
+  const { t, i18n } = useTranslation();
+  const { moduleStatus: initialModuleStatus, shopLocale } = useLoaderData();
+
+  // Initialize language based on shop locale
+  useEffect(() => {
+    if (shopLocale) {
+      const normalizedLocale = shopLocale.split('-')[0].toLowerCase();
+      const supportedLocale = ['en', 'bg'].includes(normalizedLocale) ? normalizedLocale : 'en';
+
+      if (i18n.language !== supportedLocale) {
+        i18n.changeLanguage(supportedLocale);
+      }
+    }
+  }, [shopLocale, i18n]);
   const [moduleStatus, setModuleStatus] = useState(initialModuleStatus);
 
   useEffect(() => {

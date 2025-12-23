@@ -4,6 +4,7 @@
         "navigation": {
             "overview": "Overview",
             "settings": "Settings",
+            "filters": "Interest Filters",
             "loan_calculator": "Loan Calculator"
         }
     },
@@ -11,6 +12,7 @@
         "language": "Language",
         "loading": "Loading...",
         "save": "Save",
+        "saving": "Saving...",
         "cancel": "Cancel",
         "edit": "Edit",
         "delete": "Delete"
@@ -48,8 +50,8 @@
             "loan_approved": "Loan approved for"
         },
         "toggle": {
-            "enable_module": "Enable Module",
-            "disable_module": "Disable Module"
+            "disable_module": "Disable Module",
+            "enable_module": "Enable Module"
         }
     },
     "settings": {
@@ -111,7 +113,6 @@
             "interest_rates": {
                 "0.00": "0.00% for the entire period",
                 "0.80": "0.80% for the entire period",
-                "0.90": "0.90% for the entire period",
                 "0.99": "0.99% for the entire period",
                 "1.00": "1.00% for the entire period",
                 "1.10": "1.10% for the entire period",
@@ -128,7 +129,78 @@
                 "24": "24 months",
                 "30": "30 months",
                 "36": "36 months"
+            },
+            "card_interest_rates": {
+                "0.00": "0.00% for the entire period",
+                "0.80": "0.80% for the entire period",
+                "0.90": "0.90% for the entire period",
+                "0.99": "0.99% for the entire period",
+                "1.00": "1.00% for the entire period",
+                "1.10": "1.10% for the entire period",
+                "1.20": "1.20% for the entire period",
+                "1.40": "1.40% for the entire period"
             }
         }
+    },
+    "filters": {
+        "page_title": "Interest Filters",
+        "new_filter": "New Filter",
+        "table": {
+            "product_id": "Product ID",
+            "product_id_description": "Product identifier in WooCommerce system. Use '*' for all products",
+            "interest_rate": "Interest Rate",
+            "interest_rate_description": "Select markup percentage for this filter. If 'Do not show button' is selected, button won't appear on product page",
+            "installments": "Installments",
+            "installments_description": "Months this filter applies to. Use underscore as separator",
+            "min_price": "Min Price",
+            "min_price_description": "Product price above which this filter activates. 0 = applies to all prices",
+            "start_date": "Start Date",
+            "start_date_description": "Date when this filter starts working",
+            "end_date": "End Date",
+            "end_date_description": "Date when this filter stops working",
+            "actions": "Actions"
+        },
+        "actions": {
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirm_delete": "Are you sure you want to delete this filter?",
+            "delete_success": "Filter deleted successfully",
+            "delete_error": "Error deleting filter"
+        },
+        "form": {
+            "title_new": "New Interest Filter",
+            "title_edit": "Edit Interest Filter",
+            "product_id": {
+                "label": "Product ID",
+                "placeholder": "Enter product ID or '*' for all products",
+                "required": "Product ID is required"
+            },
+            "interest_rate": {
+                "label": "Interest Rate (%)",
+                "placeholder": "Select interest rate percentage"
+            },
+            "installments": {
+                "label": "Installments",
+                "placeholder": "Enter months separated by underscore (e.g. 6_12_30)",
+                "required": "Installments are required"
+            },
+            "min_price": {
+                "label": "Minimum Price",
+                "placeholder": "Enter minimum price (0 = all prices)"
+            },
+            "start_date": {
+                "label": "Start Date",
+                "required": "Start date is required"
+            },
+            "end_date": {
+                "label": "End Date",
+                "required": "End date is required"
+            },
+            "save_button": "Save Filter",
+            "saving": "Saving...",
+            "cancel": "Cancel"
+        },
+        "no_filters": "No filters found",
+        "loading": "Loading filters..."
     }
 }
