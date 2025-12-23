@@ -3,6 +3,7 @@
         "title": "JetCredit",
         "navigation": {
             "overview": "Overview",
+            "settings": "Settings",
             "loan_calculator": "Loan Calculator"
         }
     },
@@ -52,6 +53,82 @@
         }
     },
     "settings": {
-        "updated_successfully": "Settings updated successfully"
+        "updated_successfully": "Settings updated successfully",
+        "page_title": "JetCredit Settings",
+        "save_button": "Save Settings",
+        "saving": "Saving...",
+        "module_status": {
+            "label": "Module Status",
+            "description": "Enable or disable the JetCredit module"
+        },
+        "card_button": {
+            "label": "Show Card Payment Button",
+            "description": "Display button for sending via credit card"
+        },
+        "email": {
+            "label": "Email Address",
+            "placeholder": "Enter email address",
+            "required": "Email is required",
+            "invalid": "Please enter a valid email address"
+        },
+        "shop_id": {
+            "label": "Shop Identifier",
+            "placeholder": "Enter shop identifier for sending",
+            "description": "Choose store identifier for sending"
+        },
+        "interest_rate": {
+            "label": "Interest Rate",
+            "placeholder": "Select interest rate"
+        },
+        "default_installments": {
+            "label": "Default Installments",
+            "placeholder": "Select default installment period"
+        },
+        "card_interest_rate": {
+            "label": "Card Interest Rate",
+            "placeholder": "Select card interest rate"
+        },
+        "order_count": {
+            "label": "Order Count",
+            "description": "Total number of processed orders"
+        },
+        "min_price": {
+            "label": "Minimum Amount",
+            "placeholder": "Enter minimum amount",
+            "invalid": "Minimum amount must be a positive integer"
+        },
+        "currency_display": {
+            "label": "Currency Display",
+            "placeholder": "Select currency display option"
+        },
+        "options": {
+            "currency": {
+                "leva_only": "Single display in BGN, send requests in BGN",
+                "leva_euro_dual": "Dual display BGN/EUR, send requests in BGN",
+                "euro_leva_dual": "Dual display EUR/BGN, send requests in EUR",
+                "euro_only": "Single display in EUR, send requests in EUR"
+            },
+            "interest_rates": {
+                "0.00": "0.00% for the entire period",
+                "0.80": "0.80% for the entire period",
+                "0.90": "0.90% for the entire period",
+                "0.99": "0.99% for the entire period",
+                "1.00": "1.00% for the entire period",
+                "1.10": "1.10% for the entire period",
+                "1.20": "1.20% for the entire period",
+                "1.40": "1.40% for the entire period"
+            },
+            "installments": {
+                "3": "3 months",
+                "6": "6 months",
+                "9": "9 months",
+                "12": "12 months",
+                "15": "15 months",
+                "18": "18 months",
+                "24": "24 months",
+                "30": "30 months",
+                "36": "36 months"
+            }
+        }
     }
 }

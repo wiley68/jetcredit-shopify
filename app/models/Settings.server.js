@@ -78,6 +78,51 @@ export async function getModuleStatus() {
 }
 
 /**
+ * Update all settings at once
+ * @param {Object} settingsData - All settings data to update
+ * @returns {Promise<Object>} Updated settings object
+ */
+export async function updateAllSettings(settingsData) {
+  try {
+    // Validate email if provided
+    if (settingsData.jetEmail && !isValidEmail(settingsData.jetEmail)) {
+      throw new Error('Invalid email address');
+    }
+
+    // Validate jetMinprice - must be positive integer
+    if (settingsData.jetMinprice !== undefined && settingsData.jetMinprice !== '') {
+      const minPrice = parseInt(settingsData.jetMinprice);
+      if (isNaN(minPrice) || minPrice <= 0) {
+        throw new Error('Minimum price must be a positive integer');
+      }
+    }
+
+    // Convert string values to appropriate types
+    const processedData = {
+      ...settingsData,
+      jetPurcent: settingsData.jetPurcent ? parseFloat(settingsData.jetPurcent) : undefined,
+      jetVnoskiDefault: settingsData.jetVnoskiDefault ? parseInt(settingsData.jetVnoskiDefault) : undefined,
+      jetPurcentCard: settingsData.jetPurcentCard ? parseFloat(settingsData.jetPurcentCard) : undefined,
+      jetMinprice: settingsData.jetMinprice ? parseInt(settingsData.jetMinprice) : undefined,
+      jetEur: settingsData.jetEur ? parseInt(settingsData.jetEur) : undefined,
+    };
+
+    // Remove undefined values
+    Object.keys(processedData).forEach(key => {
+      if (processedData[key] === undefined) {
+        delete processedData[key];
+      }
+    });
+
+    const updatedSettings = await updateSettings(processedData);
+    return updatedSettings;
+  } catch (error) {
+    console.error('Error updating all settings:', error);
+    throw new Error('Failed to update settings');
+  }
+}
+
+/**
  * Reset settings to defaults
  * @returns {Promise<Object>} Reset settings object
  */
@@ -102,4 +147,14 @@ export async function resetSettingsToDefaults() {
     console.error('Error resetting settings:', error);
     throw new Error('Failed to reset settings');
   }
+}
+
+/**
+ * Validate email address
+ * @param {string} email - Email to validate
+ * @returns {boolean} True if email is valid
+ */
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
