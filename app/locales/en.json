@@ -111,6 +111,7 @@
                 "euro_only": "Single display in EUR, send requests in EUR"
             },
             "interest_rates": {
+                "-1.00": "Do not show button",
                 "0.00": "0.00% for the entire period",
                 "0.80": "0.80% for the entire period",
                 "0.99": "0.99% for the entire period",

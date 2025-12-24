@@ -22,18 +22,19 @@ export const loader = async ({ request }) => {
 };
 
 export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
+  await authenticate.admin(request);
   const formData = await request.formData();
   const action = formData.get("action");
 
   switch (action) {
-    case "toggle_module":
+    case "toggle_module": {
       const status = formData.get("status") === "true";
 
       // Update module status in database
       await toggleModuleStatus(status);
 
       return { success: true, moduleStatus: status };
+    }
 
     default:
       return { success: false, error: "Unknown action" };
