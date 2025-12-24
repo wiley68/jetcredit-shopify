@@ -29,7 +29,7 @@
             "individual_rates": "Individual interest rates per product",
             "bank_integration": "Integration with bank approval system",
             "secure_data": "Secure data transmission",
-            "terms_support": "Support for different repayment terms (6-30 months)",
+            "terms_support": "Support for different repayment terms (3-36 months)",
             "inventory_update": "Automatic inventory updates"
         },
         "quick_actions": {
@@ -64,44 +64,51 @@
             "description": "Enable or disable the JetCredit module"
         },
         "card_button": {
-            "label": "Show Card Payment Button",
-            "description": "Display button for sending via credit card"
+            "label": "Show button for sending via credit card",
+            "placeholder": "Show button for sending via credit card",
+            "description": "Display button for purchasing credit through PBF Personal Finance with the loan application made via credit card"
         },
         "email": {
-            "label": "Email Address",
+            "label": "Choose email to send requests",
+            "description": "Choose email address to send requests to. Use 'online.shop@pbpf.bg' to send requests to PBF Personal Finance. You can enter multiple email addresses separated by a comma. (If left blank, the default email for the system will be used. It is recommended to use an email outside your domain to avoid auto-span protection.)",
             "placeholder": "Enter email address",
             "required": "Email is required",
             "invalid": "Please enter a valid email address"
         },
         "shop_id": {
-            "label": "Shop Identifier",
+            "label": "Choose store identifier for sending",
             "placeholder": "Enter shop identifier for sending",
-            "description": "Choose store identifier for sending"
+            "description": "Choose store identifier to send to the Bank together with the loan application. The Bank will recognize your requests with this identifier"
         },
         "interest_rate": {
-            "label": "Interest Rate",
+            "label": "Choose interest rate",
+            "description": "Choose interest rate for the loan application",
             "placeholder": "Select interest rate"
         },
         "default_installments": {
-            "label": "Default Installments",
-            "placeholder": "Select default installment period"
+            "label": "Choose default number of installments",
+            "description": "Choose default number of installments on the module page",
+            "placeholder": "Choose default number of installments"
         },
         "card_interest_rate": {
-            "label": "Card Interest Rate",
-            "placeholder": "Select card interest rate"
+            "label": "Interest rate for credit card",
+            "description": "Choose interest rate for the loan application made via credit card",
+            "placeholder": "Interest rate for credit card"
         },
         "order_count": {
-            "label": "Order Count",
-            "description": "Total number of processed orders"
+            "label": "Order number",
+            "description": "Order number for the current loan application"
         },
         "min_price": {
             "label": "Minimum Amount",
+            "description": "Minimum amount for which the filter can be activated",
             "placeholder": "Enter minimum amount",
             "invalid": "Minimum amount must be a positive integer"
         },
         "currency_display": {
-            "label": "Currency Display",
-            "placeholder": "Select currency display option"
+            "label": "Choose currency display mode",
+            "description": "Choose currency display mode for the system",
+            "placeholder": "Choose currency display mode"
         },
         "options": {
             "currency": {

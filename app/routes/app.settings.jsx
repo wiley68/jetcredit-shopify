@@ -118,26 +118,25 @@ export default function Settings() {
       <s-section heading={t('settings.page_title')}>
         <s-stack direction="block" gap="base">
           <div>
-            <s-heading size="small">{t('settings.module_status.label')}</s-heading>
             <s-switch
               name="jetStatusIn"
+              label={t('settings.module_status.label')}
+              details={t('settings.module_status.description')}
               checked={formData.jetStatusIn}
               onInput={(e) => handleFieldChange('jetStatusIn', e.target.checked)}
-            >
-              {t('settings.module_status.description')}
-            </s-switch>
+            />
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.email.label')}</s-heading>
             <s-text-field
               type="email"
+              label={t('settings.email.label')}
+              details={t('settings.email.description')}
               value={formData.jetEmail}
               onInput={(event) => handleFieldChange('jetEmail', event.target.value)}
               placeholder={t('settings.email.placeholder')}
               required
-            >
-            </s-text-field>
+            />
             {errors.jetEmail && (
               <s-banner status="critical" style={{ marginTop: "8px" }}>
                 {errors.jetEmail}
@@ -146,18 +145,19 @@ export default function Settings() {
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.shop_id.label')}</s-heading>
             <s-text-field
               value={formData.jetId}
+              label={t('settings.shop_id.label')}
+              details={t('settings.shop_id.description')}
               onInput={(event) => handleFieldChange('jetId', event.target.value)}
               placeholder={t('settings.shop_id.placeholder')}
-            >
-            </s-text-field>
+            />
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.interest_rate.label')}</s-heading>
             <s-select
+              label={t('settings.interest_rate.label')}
+              details={t('settings.interest_rate.description')}
               value={formData.jetPurcent}
               onInput={(event) => handleFieldChange('jetPurcent', event.target.value)}
             >
@@ -172,8 +172,9 @@ export default function Settings() {
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.default_installments.label')}</s-heading>
             <s-select
+              label={t('settings.default_installments.label')}
+              details={t('settings.default_installments.description')}
               value={formData.jetVnoskiDefault}
               onInput={(event) => handleFieldChange('jetVnoskiDefault', event.target.value)}
             >
@@ -190,20 +191,20 @@ export default function Settings() {
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.card_button.label')}</s-heading>
             <s-switch
               name="jetCardIn"
+              label={t('settings.card_button.label')}
+              details={t('settings.card_button.description')}
               checked={formData.jetCardIn}
               onInput={(e) => handleFieldChange('jetCardIn', e.target.checked)}
-            >
-              {t('settings.card_button.description')}
-            </s-switch>
+            />
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.card_interest_rate.label')}</s-heading>
             <s-select
               value={formData.jetPurcentCard}
+              label={t('settings.card_interest_rate.label')}
+              details={t('settings.card_interest_rate.description')}
               onInput={(event) => handleFieldChange('jetPurcentCard', event.target.value)}
             >
               <s-option value="0.00">{t('settings.options.interest_rates.0.00')}</s-option>
@@ -218,24 +219,23 @@ export default function Settings() {
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.order_count.label')}</s-heading>
             <s-text-field
+              label={t('settings.order_count.label')}
+              details={t('settings.order_count.description')}
               value={formData.jetCount}
               disabled
-              helpText={t('settings.order_count.description')}
-            >
-            </s-text-field>
+            />
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.min_price.label')}</s-heading>
             <s-text-field
               type="number"
+              label={t('settings.min_price.label')}
+              details={t('settings.min_price.description')}
               value={formData.jetMinprice}
               onInput={(event) => handleFieldChange('jetMinprice', event.target.value)}
               placeholder={t('settings.min_price.placeholder')}
-            >
-            </s-text-field>
+            />
             {errors.jetMinprice && (
               <s-banner status="critical" style={{ marginTop: "8px" }}>
                 {errors.jetMinprice}
@@ -244,8 +244,9 @@ export default function Settings() {
           </div>
 
           <div>
-            <s-heading size="small">{t('settings.currency_display.label')}</s-heading>
             <s-select
+              label={t('settings.currency_display.label')}
+              details={t('settings.currency_display.description')}
               value={formData.jetEur}
               onInput={(event) => handleFieldChange('jetEur', event.target.value)}
             >
