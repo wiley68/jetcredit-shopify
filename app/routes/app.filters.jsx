@@ -45,20 +45,9 @@ export default function Filters() {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const shopify = useAppBridge();
-  const { t, i18n } = useTranslation();
-  const { filters, shopLocale } = useLoaderData();
+  const { t } = useTranslation();
+  const { filters } = useLoaderData();
 
-  // Initialize language based on shop locale
-  useEffect(() => {
-    if (shopLocale) {
-      const normalizedLocale = shopLocale.split('-')[0].toLowerCase();
-      const supportedLocale = ['en', 'bg'].includes(normalizedLocale) ? normalizedLocale : 'en';
-
-      if (i18n.language !== supportedLocale) {
-        i18n.changeLanguage(supportedLocale);
-      }
-    }
-  }, [shopLocale, i18n]);
 
   useEffect(() => {
     if (fetcher.data?.success && fetcher.data?.message) {

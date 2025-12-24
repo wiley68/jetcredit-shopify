@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useFetcher, useLoaderData, useNavigate } from "react-router";
+import { useFetcher, useNavigate } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { boundary } from "@shopify/shopify-app-react-router/server";
@@ -7,14 +7,9 @@ import { authenticate } from "../shopify.server";
 import { createFilter } from "../models/Filters.server";
 
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
+  await authenticate.admin(request);
 
-  // Get shop locale from session
-  const shopLocale = session?.locale || 'en';
-
-  return {
-    shopLocale
-  };
+  return {};
 };
 
 export const action = async ({ request }) => {
@@ -69,20 +64,8 @@ export default function NewFilter() {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const shopify = useAppBridge();
-  const { t, i18n } = useTranslation();
-  const { shopLocale } = useLoaderData();
+  const { t } = useTranslation();
 
-  // Initialize language based on shop locale
-  useEffect(() => {
-    if (shopLocale) {
-      const normalizedLocale = shopLocale.split('-')[0].toLowerCase();
-      const supportedLocale = ['en', 'bg'].includes(normalizedLocale) ? normalizedLocale : 'en';
-
-      if (i18n.language !== supportedLocale) {
-        i18n.changeLanguage(supportedLocale);
-      }
-    }
-  }, [shopLocale, i18n]);
 
   const [formData, setFormData] = useState({
     jetProductId: "",

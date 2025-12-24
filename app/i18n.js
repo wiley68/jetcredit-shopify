@@ -1,3 +1,5 @@
+/* global process */
+
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -23,19 +25,13 @@ i18n
   // Initialize i18next
   .init({
     resources,
+    lng: 'en', // Start with English as default
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
 
-    // Language detection options
+    // Language detection options - disabled automatic detection
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      lookupLocalStorage: 'i18nextLng',
-      caches: ['localStorage'],
-      // Convert detected language to our supported languages
-      convertDetectedLanguage: (lng) => {
-        const normalized = lng?.split('-')[0]?.toLowerCase();
-        return ['en', 'bg'].includes(normalized) ? normalized : 'en';
-      }
+      order: [], // Disable automatic detection, we'll set language manually
     },
 
     interpolation: {
