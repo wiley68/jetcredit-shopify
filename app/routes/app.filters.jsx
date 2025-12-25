@@ -89,92 +89,92 @@ export default function Filters() {
         {t('filters.new_filter')}
       </s-button>
 
-      <s-section>
-        {filters && filters.length > 0 ? (
+      {filters && filters.length > 0 ? (
+        <s-section padding="none">
           <s-table>
-            <s-table-head>
-              <s-table-row>
-                <s-table-header>{t('filters.table.product_id')}</s-table-header>
-                <s-table-header>{t('filters.table.interest_rate')}</s-table-header>
-                <s-table-header>{t('filters.table.installments')}</s-table-header>
-                <s-table-header>{t('filters.table.min_price')}</s-table-header>
-                <s-table-header>{t('filters.table.start_date')}</s-table-header>
-                <s-table-header>{t('filters.table.end_date')}</s-table-header>
-                <s-table-header>{t('filters.table.actions')}</s-table-header>
-              </s-table-row>
-            </s-table-head>
+            <s-table-header-row>
+              <s-table-header>
+                <s-text type="strong" interestFor="product-id-tooltip">{t('filters.table.product_id')}</s-text>
+                <s-tooltip id="product-id-tooltip">{t('filters.table.product_id_description')}</s-tooltip>
+              </s-table-header>
+              <s-table-header>
+                <s-text type="strong" interestFor="interest-rate-tooltip">{t('filters.table.interest_rate')}</s-text>
+                <s-tooltip id="interest-rate-tooltip">{t('filters.table.interest_rate_description')}</s-tooltip>
+              </s-table-header>
+              <s-table-header>
+                <s-text type="strong" interestFor="installments-tooltip">{t('filters.table.installments')}</s-text>
+                <s-tooltip id="installments-tooltip">{t('filters.table.installments_description')}</s-tooltip>
+              </s-table-header>
+              <s-table-header>
+                <s-text type="strong" interestFor="min-price-tooltip">{t('filters.table.min_price')}</s-text>
+                <s-tooltip id="min-price-tooltip">{t('filters.table.min_price_description')}</s-tooltip>
+              </s-table-header>
+              <s-table-header>
+                <s-text type="strong" interestFor="start-date-tooltip">{t('filters.table.start_date')}</s-text>
+                <s-tooltip id="start-date-tooltip">{t('filters.table.start_date_description')}</s-tooltip>
+              </s-table-header>
+              <s-table-header>
+                <s-text type="strong" interestFor="end-date-tooltip">{t('filters.table.end_date')}</s-text>
+                <s-tooltip id="end-date-tooltip">{t('filters.table.end_date_description')}</s-tooltip>
+              </s-table-header>
+              <s-table-header>{t('filters.table.actions')}</s-table-header>
+            </s-table-header-row>
             <s-table-body>
               {filters.map((filter) => (
                 <s-table-row key={filter.id}>
                   <s-table-cell>
-                    <s-text fontWeight="semibold">{filter.jetProductId}</s-text>
-                    <s-text size="small" color="subdued">
-                      {t('filters.table.product_id_description')}
-                    </s-text>
+                    <s-text>{filter.jetProductId}</s-text>
                   </s-table-cell>
                   <s-table-cell>
-                    <s-badge tone="info">{filter.jetProductPercent}%</s-badge>
-                    <s-text size="small" color="subdued">
-                      {t('filters.table.interest_rate_description')}
-                    </s-text>
+                    <s-badge tone="info">{filter.jetProductPercent.toFixed(2)}%</s-badge>
                   </s-table-cell>
                   <s-table-cell>
                     {formatInstallments(filter.jetProductMeseci)}
-                    <s-text size="small" color="subdued">
-                      {t('filters.table.installments_description')}
-                    </s-text>
                   </s-table-cell>
                   <s-table-cell>
-                    €{filter.jetProductPrice}
-                    <s-text size="small" color="subdued">
-                      {t('filters.table.min_price_description')}
-                    </s-text>
+                    {filter.jetProductPrice.toFixed(2)}
                   </s-table-cell>
                   <s-table-cell>
                     {formatDate(filter.jetProductStart)}
-                    <s-text size="small" color="subdued">
-                      {t('filters.table.start_date_description')}
-                    </s-text>
                   </s-table-cell>
                   <s-table-cell>
                     {formatDate(filter.jetProductEnd)}
-                    <s-text size="small" color="subdued">
-                      {t('filters.table.end_date_description')}
-                    </s-text>
                   </s-table-cell>
                   <s-table-cell>
-                    <s-button-group>
+                    <s-stack direction="inline" gap="small-300">
                       <s-button
-                        size="small"
+                        variant="secondary"
+                        icon="edit"
                         onClick={() => navigate(`/app/filters/${filter.id}`)}
                       >
                         {t('filters.actions.edit')}
                       </s-button>
                       <s-button
-                        size="small"
+                        variant="secondary"
+                        icon="delete"
                         tone="critical"
                         onClick={() => handleDelete(filter.id)}
                       >
                         {t('filters.actions.delete')}
                       </s-button>
-                    </s-button-group>
+                    </s-stack>
                   </s-table-cell>
                 </s-table-row>
               ))}
             </s-table-body>
           </s-table>
-        ) : (
-          <s-empty-state
-            heading={t('filters.no_filters')}
-            action={{
-              content: t('filters.new_filter'),
-              onAction: () => navigate('/app/filters_new')
-            }}
-          >
-            <p>{t('filters.loading')}</p>
-          </s-empty-state>
-        )}
-      </s-section>
+        </s-section>
+      ) : (
+        <s-empty-state
+          heading={t('filters.no_filters')}
+          action={{
+            content: t('filters.new_filter'),
+            onAction: () => navigate('/app/filters_new')
+          }}
+        >
+          <p>{t('filters.loading')}</p>
+        </s-empty-state>
+      )}
     </s-page>
   );
 }

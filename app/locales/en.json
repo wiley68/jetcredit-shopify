@@ -155,7 +155,7 @@
         "new_filter": "New Filter",
         "table": {
             "product_id": "Product ID number",
-            "product_id_description": "Product identifier in WooCommerce system. Use '*' for all products",
+            "product_id_description": "Product identifier in Shopify system. Id #. The filter applies to all products if you use the global symbol *",
             "interest_rate": "Interest Rate",
             "interest_rate_description": "Select markup percentage for this filter. If 'Do not show button' is selected, button won't appear on product page",
             "installments": "Installments",
