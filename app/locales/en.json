@@ -154,7 +154,7 @@
         "page_title": "Interest Filters",
         "new_filter": "New Filter",
         "table": {
-            "product_id": "Product ID",
+            "product_id": "Product ID number",
             "product_id_description": "Product identifier in WooCommerce system. Use '*' for all products",
             "interest_rate": "Interest Rate",
             "interest_rate_description": "Select markup percentage for this filter. If 'Do not show button' is selected, button won't appear on product page",
@@ -179,30 +179,30 @@
             "title_new": "New Interest Filter",
             "title_edit": "Edit Interest Filter",
             "product_id": {
-                "label": "Product ID",
+                "label": "Product ID number",
+                "description": "The identifier of a product in the Shopify system. Id #. The filter applies to all products if you use the global symbol *",
                 "placeholder": "Enter product ID or '*' for all products",
                 "required": "Product ID is required"
             },
             "interest_rate": {
-                "label": "Interest Rate (%)",
-                "placeholder": "Select interest rate percentage"
+                "label": "Choose interest rate",
+                "description": "Choose interest rate for the filter. If you select 'Do not show button', the button will not appear on the product page"
             },
             "installments": {
-                "label": "Installments",
-                "placeholder": "Enter months separated by underscore (e.g. 6_12_30)",
-                "required": "Installments are required"
+                "label": "For which monthly installments does the filter apply",
+                "description": "Use underscore as separator"
             },
             "min_price": {
-                "label": "Minimum Price",
-                "placeholder": "Enter minimum price (0 = all prices)"
+                "label": "Product price above which this filter activates",
+                "description": "If you leave 0, the filter will apply to all prices"
             },
             "start_date": {
-                "label": "Start Date",
-                "required": "Start date is required"
+                "label": "Start of filter action",
+                "description": "Date from which the filter starts working"
             },
             "end_date": {
-                "label": "End Date",
-                "required": "End date is required"
+                "label": "End of filter action",
+                "description": "Date until which the filter is active"
             },
             "save_button": "Save Filter",
             "saving": "Saving...",

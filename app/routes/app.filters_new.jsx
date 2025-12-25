@@ -160,13 +160,14 @@ export default function NewFilter() {
         </s-banner>
       )}
 
-      <s-section heading={t('filters.form.product_id.label')}>
+      <s-section>
         <s-stack direction="block" gap="base">
           <s-text-field
             value={formData.jetProductId}
+            label={t('filters.form.product_id.label')}
+            details={t('filters.form.product_id.description')}
             onInput={(event) => handleFieldChange('jetProductId', event.target.value)}
             placeholder={t('filters.form.product_id.placeholder')}
-            helpText={t('filters.table.product_id_description')}
           />
           {errors.jetProductId && (
             <s-banner status="critical" style={{ marginTop: "8px" }}>
@@ -176,9 +177,11 @@ export default function NewFilter() {
         </s-stack>
       </s-section>
 
-      <s-section heading={t('filters.form.interest_rate.label')}>
+      <s-section>
         <s-select
           value={formData.jetProductPercent}
+          label={t('filters.form.interest_rate.label')}
+          details={t('filters.form.interest_rate.description')}
           onInput={(event) => handleFieldChange('jetProductPercent', event.target.value)}
         >
           <s-option value="-1.00">{t('settings.options.interest_rates.-1.00')}</s-option>
@@ -192,43 +195,44 @@ export default function NewFilter() {
         </s-select>
       </s-section>
 
-      <s-section heading={t('filters.form.installments.label')}>
+      <s-section>
         <s-text-field
           value={formData.jetProductMeseci}
+          label={t('filters.form.installments.label')}
+          details={t('filters.form.installments.description')}
           onInput={(event) => handleFieldChange('jetProductMeseci', event.target.value)}
           placeholder="6_12_24"
-          helpText={t('filters.table.installments_description')}
         />
-        {errors.jetProductMeseci && (
-          <s-banner status="critical" style={{ marginTop: "8px" }}>
-            {errors.jetProductMeseci}
-          </s-banner>
-        )}
       </s-section>
 
-      <s-section heading={t('filters.form.min_price.label')}>
+      <s-section>
         <s-text-field
           type="number"
           value={formData.jetProductPrice}
+          label={t('filters.form.min_price.label')}
+          details={t('filters.form.min_price.description')}
           onInput={(event) => handleFieldChange('jetProductPrice', event.target.value)}
           placeholder={t('filters.form.min_price.placeholder')}
-          helpText={t('filters.table.min_price_description')}
         />
       </s-section>
 
-      <s-section heading={t('filters.table.start_date')}>
-        <s-stack direction="block" gap="base">
+      <s-section>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <s-date-field
             value={formData.jetProductStart}
+            label={t('filters.form.start_date.label')}
+            details={t('filters.form.start_date.description')}
             onInput={(event) => handleFieldChange('jetProductStart', event.target.value)}
             required
           />
           <s-date-field
             value={formData.jetProductEnd}
+            label={t('filters.form.end_date.label')}
+            details={t('filters.form.end_date.description')}
             onInput={(event) => handleFieldChange('jetProductEnd', event.target.value)}
             required
           />
-        </s-stack>
+        </div>
       </s-section>
     </s-page>
   );
