@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useFetcher, useLoaderData, useNavigate } from "react-router";
+import { useFetcher, useLoaderData, useNavigate, useRevalidator } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { boundary } from "@shopify/shopify-app-react-router/server";
@@ -44,10 +44,20 @@ export const action = async ({ request }) => {
 export default function Filters() {
   const fetcher = useFetcher();
   const navigate = useNavigate();
+  const revalidator = useRevalidator();
   const shopify = useAppBridge();
   const { t } = useTranslation();
   const { filters } = useLoaderData();
 
+  // Reload data when returning from edit page
+  useEffect(() => {
+    const handleFocus = () => {
+      revalidator.revalidate();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [revalidator]);
 
   useEffect(() => {
     if (fetcher.data?.success && fetcher.data?.message) {
@@ -126,7 +136,12 @@ export default function Filters() {
                     <s-text>{filter.jetProductId}</s-text>
                   </s-table-cell>
                   <s-table-cell>
-                    <s-badge tone="info">{filter.jetProductPercent.toFixed(2)}%</s-badge>
+                    <s-badge tone="info">
+                      {filter.jetProductPercent === -1.00
+                        ? t('settings.options.interest_rates.-1.00')
+                        : `${filter.jetProductPercent.toFixed(2)}%`
+                      }
+                    </s-badge>
                   </s-table-cell>
                   <s-table-cell>
                     {formatInstallments(filter.jetProductMeseci)}
@@ -145,7 +160,7 @@ export default function Filters() {
                       <s-button
                         variant="secondary"
                         icon="edit"
-                        onClick={() => navigate(`/app/filters/${filter.id}`)}
+                        onClick={() => navigate(`/app/filters_edit/${filter.id}`)}
                       >
                         {t('filters.actions.edit')}
                       </s-button>

@@ -1,31 +1,58 @@
 import { useEffect, useState } from "react";
-import { useFetcher, useNavigate } from "react-router";
+import { useFetcher, useLoaderData, useNavigate } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { createFilter } from "../models/Filters.server";
+import { getFilterById, updateFilter } from "../models/Filters.server";
 
-export const loader = async ({ request }) => {
+export const loader = async ({ request, params }) => {
   await authenticate.admin(request);
 
-  return {};
+  // Get filter by ID
+  const filter = await getFilterById(params.id);
+  if (!filter) {
+    throw new Response("Filter not found", { status: 404 });
+  }
+
+  return {
+    filter
+  };
 };
 
-export const action = async ({ request }) => {
+export const action = async ({ request, params }) => {
   await authenticate.admin(request);
   const formData = await request.formData();
 
   const startDateStr = formData.get("jetProductStart");
   const endDateStr = formData.get("jetProductEnd");
 
+  // Convert dates from YYYY-MM-DD to ISO strings at the start of day UTC
+  let jetProductStart, jetProductEnd;
+
+  if (startDateStr) {
+    // Create date at the start of day in UTC and convert to ISO string
+    const utcDate = new Date(startDateStr + 'T00:00:00.000Z');
+    jetProductStart = utcDate.toISOString();
+  } else {
+    jetProductStart = new Date().toISOString();
+  }
+
+  if (endDateStr) {
+    // Create date at the start of day in UTC and convert to ISO string
+    const utcDate = new Date(endDateStr + 'T00:00:00.000Z');
+    jetProductEnd = utcDate.toISOString();
+  } else {
+    jetProductEnd = new Date().toISOString();
+  }
+
   const filterData = {
     jetProductId: formData.get("jetProductId") || "*",
     jetProductPercent: parseFloat(formData.get("jetProductPercent")) || 0,
     jetProductMeseci: formData.get("jetProductMeseci") || "",
     jetProductPrice: parseFloat(formData.get("jetProductPrice")) || 0,
-    jetProductStart: startDateStr ? new Date(startDateStr + 'T00:00:00.000Z').toISOString() : new Date().toISOString(),
-    jetProductEnd: endDateStr ? new Date(endDateStr + 'T00:00:00.000Z').toISOString() : new Date().toISOString(),
+    jetProductStart,
+    jetProductEnd,
   };
 
   // Validate product ID
@@ -56,34 +83,41 @@ export const action = async ({ request }) => {
   }
 
   try {
-    const newFilter = await createFilter(filterData);
-    return { success: true, filter: newFilter };
+    const updatedFilter = await updateFilter(params.id, filterData);
+    return { success: true, filter: updatedFilter };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-export default function NewFilter() {
+export default function EditFilter() {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const shopify = useAppBridge();
   const { t } = useTranslation();
+  const { filter } = useLoaderData();
 
+
+  // Convert dates from UTC to local YYYY-MM-DD format for date inputs
+  const initialStartDate = filter.jetProductStart ?
+    new Date(filter.jetProductStart).toISOString().split('T')[0] : "";
+  const initialEndDate = filter.jetProductEnd ?
+    new Date(filter.jetProductEnd).toISOString().split('T')[0] : "";
 
   const [formData, setFormData] = useState({
-    jetProductId: "",
-    jetProductPercent: "0.00",
-    jetProductMeseci: "",
-    jetProductPrice: "0",
-    jetProductStart: new Date().toISOString().split('T')[0],
-    jetProductEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    jetProductId: filter.jetProductId || "",
+    jetProductPercent: filter.jetProductPercent?.toString() || "0.00",
+    jetProductMeseci: filter.jetProductMeseci || "",
+    jetProductPrice: filter.jetProductPrice?.toString() || "0",
+    jetProductStart: initialStartDate,
+    jetProductEnd: initialEndDate,
   });
 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (fetcher.data?.success && fetcher.data?.filter) {
-      shopify.toast.show('Filter created successfully');
+      shopify.toast.show('Filter updated successfully');
       navigate('/app/filters');
     } else if (fetcher.data?.error) {
       setErrors({ general: fetcher.data.error });
@@ -131,7 +165,7 @@ export default function NewFilter() {
     }
 
     setErrors({});
-    fetcher.submit({ ...formData, action: "create_filter" }, { method: "POST" });
+    fetcher.submit({ ...formData, action: "update_filter" }, { method: "POST" });
   };
 
   const handleFieldChange = (field, value) => {
@@ -142,7 +176,7 @@ export default function NewFilter() {
   };
 
   return (
-    <s-page heading={t('filters.form.title_new')}>
+    <s-page heading={t('filters.form.title_edit')}>
       <s-button
         slot="primary-action"
         onClick={handleSubmit}
@@ -150,13 +184,12 @@ export default function NewFilter() {
       >
         {fetcher.state === "submitting" ? t('filters.form.saving') : t('filters.form.save_button')}
       </s-button>
-      <s-link
+      <s-button
         slot="secondary-actions"
-        href="/app/filters"
-        accessibilityLabel={t('common.cancel')}
+        onClick={() => navigate('/app/filters')}
       >
         {t('common.cancel')}
-      </s-link>
+      </s-button>
 
       {errors.general && (
         <s-banner status="critical">
@@ -164,14 +197,13 @@ export default function NewFilter() {
         </s-banner>
       )}
 
-      <s-section>
+      <s-section heading={t('filters.form.product_id.label')}>
         <s-stack direction="block" gap="base">
           <s-text-field
             value={formData.jetProductId}
-            label={t('filters.form.product_id.label')}
-            details={t('filters.form.product_id.description')}
             onInput={(event) => handleFieldChange('jetProductId', event.target.value)}
             placeholder={t('filters.form.product_id.placeholder')}
+            helpText={t('filters.table.product_id_description')}
           />
           {errors.jetProductId && (
             <s-banner status="critical" style={{ marginTop: "8px" }}>
@@ -181,11 +213,9 @@ export default function NewFilter() {
         </s-stack>
       </s-section>
 
-      <s-section>
+      <s-section heading={t('filters.form.interest_rate.label')}>
         <s-select
           value={formData.jetProductPercent}
-          label={t('filters.form.interest_rate.label')}
-          details={t('filters.form.interest_rate.description')}
           onInput={(event) => handleFieldChange('jetProductPercent', event.target.value)}
         >
           <s-option value="-1.00">{t('settings.options.interest_rates.-1.00')}</s-option>
@@ -199,28 +229,31 @@ export default function NewFilter() {
         </s-select>
       </s-section>
 
-      <s-section>
+      <s-section heading={t('filters.form.installments.label')}>
         <s-text-field
           value={formData.jetProductMeseci}
-          label={t('filters.form.installments.label')}
-          details={t('filters.form.installments.description')}
           onInput={(event) => handleFieldChange('jetProductMeseci', event.target.value)}
           placeholder="6_12_24"
+          helpText={t('filters.table.installments_description')}
         />
+        {errors.jetProductMeseci && (
+          <s-banner status="critical" style={{ marginTop: "8px" }}>
+            {errors.jetProductMeseci}
+          </s-banner>
+        )}
       </s-section>
 
-      <s-section>
+      <s-section heading={t('filters.form.min_price.label')}>
         <s-text-field
           type="number"
           value={formData.jetProductPrice}
-          label={t('filters.form.min_price.label')}
-          details={t('filters.form.min_price.description')}
           onInput={(event) => handleFieldChange('jetProductPrice', event.target.value)}
           placeholder={t('filters.form.min_price.placeholder')}
+          helpText={t('filters.table.min_price_description')}
         />
       </s-section>
 
-      <s-section>
+      <s-section heading={t('filters.table.start_date')}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <s-date-field
             value={formData.jetProductStart}

@@ -194,6 +194,7 @@
             },
             "min_price": {
                 "label": "Product price above which this filter activates",
+                "placeholder": "Enter minimum price (0 = all prices)",
                 "description": "If you leave 0, the filter will apply to all prices"
             },
             "start_date": {

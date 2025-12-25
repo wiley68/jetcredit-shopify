@@ -22,10 +22,7 @@ export default function App() {
 
   // Initialize language - force Bulgarian since user sees Bulgarian UI
   useEffect(() => {
-    console.log('Shopify App - forcing Bulgarian language');
-
     if (i18n.language !== 'bg') {
-      console.log('Shopify App - changing language to Bulgarian');
       i18n.changeLanguage('bg');
     }
   }, [i18n]);
