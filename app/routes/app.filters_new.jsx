@@ -6,6 +6,27 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { createFilter } from "../models/Filters.server";
 
+function parseDateOnlyToUtcStart(dateStr) {
+  // dateStr expected "YYYY-MM-DD"
+  return new Date(`${dateStr}T00:00:00.000Z`);
+}
+
+function parseDateOnlyToUtcEndInclusive(dateStr) {
+  // inclusive end-of-day
+  return new Date(`${dateStr}T23:59:59.999Z`);
+}
+
+function normalizeInstallments(meseciStr) {
+  // "24_6_12" -> "6_12_24"
+  const parts = meseciStr
+    .split("_")
+    .map((x) => Number(x))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+  const uniqueSorted = Array.from(new Set(parts)).sort((a, b) => a - b);
+  return uniqueSorted.join("_");
+}
+
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
 
@@ -16,42 +37,55 @@ export const action = async ({ request }) => {
   await authenticate.admin(request);
   const formData = await request.formData();
 
-  const startDateStr = formData.get("jetProductStart");
-  const endDateStr = formData.get("jetProductEnd");
+  const jetProductIdRaw = (formData.get("jetProductId") || "*").toString().trim();
+  const jetProductMeseciRaw = (formData.get("jetProductMeseci") || "").toString().trim();
+
+  const startDateStr = (formData.get("jetProductStart") || "").toString().trim();
+  const endDateStr = (formData.get("jetProductEnd") || "").toString().trim();
 
   const filterData = {
-    jetProductId: formData.get("jetProductId") || "*",
-    jetProductPercent: parseFloat(formData.get("jetProductPercent")) || 0,
-    jetProductMeseci: formData.get("jetProductMeseci") || "",
-    jetProductPrice: parseFloat(formData.get("jetProductPrice")) || 0,
-    jetProductStart: startDateStr ? new Date(startDateStr + 'T00:00:00.000Z').toISOString() : new Date().toISOString(),
-    jetProductEnd: endDateStr ? new Date(endDateStr + 'T00:00:00.000Z').toISOString() : new Date().toISOString(),
+    jetProductId: jetProductIdRaw || "*",
+    jetProductPercent: Number.parseFloat(formData.get("jetProductPercent")) || 0,
+    jetProductMeseci: jetProductMeseciRaw ? normalizeInstallments(jetProductMeseciRaw) : "",
+    jetProductPrice: Number.parseFloat(formData.get("jetProductPrice")) || 0,
+
+    // IMPORTANT: pass Date objects directly (no ISO strings)
+    jetProductStart: startDateStr ? parseDateOnlyToUtcStart(startDateStr) : new Date(),
+    jetProductEnd: endDateStr ? parseDateOnlyToUtcEndInclusive(endDateStr) : new Date(),
   };
 
   // Validate product ID
-  if (filterData.jetProductId.trim()) {
-    const productId = filterData.jetProductId.trim();
-    if (productId !== "*" && !productId.startsWith("gid://shopify/Product/")) {
-      return { success: false, error: "Product ID must be '*' for all products or a valid Shopify Product ID (gid://shopify/Product/...)" };
-    }
+  if (filterData.jetProductId !== "*" && !filterData.jetProductId.startsWith("gid://shopify/Product/")) {
+    return {
+      success: false,
+      error: "Product ID must be '*' for all products or a valid Shopify Product ID (gid://shopify/Product/...)",
+    };
+  }
+
+  // Validate percent & price basic sanity
+  if (!Number.isFinite(filterData.jetProductPercent) || filterData.jetProductPercent < -1 || filterData.jetProductPercent > 10) {
+    return { success: false, error: "Invalid interest rate value." };
+  }
+
+  if (!Number.isFinite(filterData.jetProductPrice) || filterData.jetProductPrice < 0) {
+    return { success: false, error: "Minimum price must be a non-negative number." };
   }
 
   // Validate installments format and values (optional field)
-  if (filterData.jetProductMeseci.trim()) {
-    const validInstallments = [3, 6, 9, 12, 15, 18, 24, 30, 36];
-    const installments = filterData.jetProductMeseci.split('_').map(Number);
+  if (filterData.jetProductMeseci) {
+    const validInstallments = new Set([3, 6, 9, 12, 15, 18, 24, 30, 36]);
+    const installments = filterData.jetProductMeseci.split("_").map(Number);
 
-    if (installments.some(inst => !validInstallments.includes(inst))) {
-      return { success: false, error: "Invalid installment values. Valid options: 3, 6, 9, 12, 15, 18, 24, 30, 36" };
-    }
-
-    // Check for duplicates
-    if (installments.length !== new Set(installments).size) {
-      return { success: false, error: "Duplicate installment values are not allowed" };
+    if (installments.some((inst) => !validInstallments.has(inst))) {
+      return {
+        success: false,
+        error: "Invalid installment values. Valid options: 3, 6, 9, 12, 15, 18, 24, 30, 36",
+      };
     }
   }
 
-  if (filterData.jetProductStart >= filterData.jetProductEnd) {
+  // Date order check (real date compare)
+  if (filterData.jetProductStart.getTime() >= filterData.jetProductEnd.getTime()) {
     return { success: false, error: "End date must be after start date" };
   }
 
@@ -59,7 +93,7 @@ export const action = async ({ request }) => {
     const newFilter = await createFilter(filterData);
     return { success: true, filter: newFilter };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: error.message || "Failed to create filter" };
   }
 };
 
@@ -170,7 +204,7 @@ export default function NewFilter() {
             value={formData.jetProductId}
             label={t('filters.form.product_id.label')}
             details={t('filters.form.product_id.description')}
-            onInput={(event) => handleFieldChange('jetProductId', event.target.value)}
+            onChange={(event) => handleFieldChange('jetProductId', event.currentTarget.value)}
             placeholder={t('filters.form.product_id.placeholder')}
           />
           {errors.jetProductId && (
@@ -186,7 +220,7 @@ export default function NewFilter() {
           value={formData.jetProductPercent}
           label={t('filters.form.interest_rate.label')}
           details={t('filters.form.interest_rate.description')}
-          onInput={(event) => handleFieldChange('jetProductPercent', event.target.value)}
+          onChange={(event) => handleFieldChange('jetProductPercent', event.currentTarget.value)}
         >
           <s-option value="-1.00">{t('settings.options.interest_rates.-1.00')}</s-option>
           <s-option value="0.00">{t('settings.options.interest_rates.0.00')}</s-option>
@@ -204,7 +238,7 @@ export default function NewFilter() {
           value={formData.jetProductMeseci}
           label={t('filters.form.installments.label')}
           details={t('filters.form.installments.description')}
-          onInput={(event) => handleFieldChange('jetProductMeseci', event.target.value)}
+          onChange={(event) => handleFieldChange('jetProductMeseci', event.currentTarget.value)}
           placeholder="6_12_24"
         />
       </s-section>
@@ -215,7 +249,7 @@ export default function NewFilter() {
           value={formData.jetProductPrice}
           label={t('filters.form.min_price.label')}
           details={t('filters.form.min_price.description')}
-          onInput={(event) => handleFieldChange('jetProductPrice', event.target.value)}
+          onChange={(event) => handleFieldChange('jetProductPrice', event.currentTarget.value)}
           placeholder={t('filters.form.min_price.placeholder')}
         />
       </s-section>
@@ -226,14 +260,18 @@ export default function NewFilter() {
             value={formData.jetProductStart}
             label={t('filters.form.start_date.label')}
             details={t('filters.form.start_date.description')}
-            onInput={(event) => handleFieldChange('jetProductStart', event.target.value)}
+            onChange={(event) =>
+              handleFieldChange('jetProductStart', event.currentTarget.value)
+            }
             required
           />
           <s-date-field
             value={formData.jetProductEnd}
             label={t('filters.form.end_date.label')}
             details={t('filters.form.end_date.description')}
-            onInput={(event) => handleFieldChange('jetProductEnd', event.target.value)}
+            onChange={(event) =>
+              handleFieldChange('jetProductEnd', event.currentTarget.value)
+            }
             required
           />
         </div>

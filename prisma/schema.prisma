@@ -57,4 +57,7 @@ model Filters {
   jetProductEnd     DateTime // End date of the filter
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  @@index([jetProductId])
+  @@index([jetProductStart, jetProductEnd])
 }
