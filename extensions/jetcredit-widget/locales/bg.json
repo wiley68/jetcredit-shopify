@@ -1,0 +1,11 @@
+{
+  "ratings": {
+    "stars": {
+      "label": "Оценки"
+    },
+    "home": {
+      "recommendationText": "Препоръчан продукт!"
+    }
+  },
+  "jet_gap_label": "Отстояние над бутона"
+}

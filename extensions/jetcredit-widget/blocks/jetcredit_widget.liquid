@@ -7,8 +7,20 @@
   class="jetcredit-widget"
   data-jetcredit
   data-shop-domain="{{ shop.permanent_domain }}"
+  data-shop-locale="{{ shop.locale }}"
 >
-  <div class="jetcredit-inline" hidden>
+  <div
+    id="jet-product-button-container"
+    class="jetcredit-inline"
+    hidden
+    style="margin-top: {{ block.settings.jet_gap }}px;"
+  >
+    {% if block.settings.zaiavka1jet_text != blank %}
+      <div class="jet_button_div_txt">
+        {{ block.settings.zaiavka1jet_text }}
+      </div>
+    {% endif %}
+
     <button type="button" class="jetcredit-logoBtn" aria-label="JetCredit">
       <img
         class="jetcredit-logo"
@@ -24,6 +36,10 @@
       <span class="jetcredit-miniMonths">–</span> x
       <span class="jetcredit-miniMonthly">–</span>
       <span class="jetcredit-miniCurrency"></span>
+    </div>
+
+    <div class="jetcredit-miniTextSecond" style="display:none;">
+      (<span class="jetcredit-miniMonthlySecond">–</span> <span class="jetcredit-miniCurrencySecond"></span>)
     </div>
   </div>
 
@@ -42,6 +58,23 @@
 {
   "name": "JetCredit widget",
   "target": "section",
-  "settings": []
+  "settings": [
+    {
+      "type": "text",
+      "id": "zaiavka1jet_text",
+      "label": "Text above button",
+      "default": "Купи на изплащане с ПБ Лични Финанси"
+    },
+    {
+      "type": "range",
+      "id": "jet_gap",
+      "label": "Top margin",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    }
+  ]
 }
 {% endschema %}

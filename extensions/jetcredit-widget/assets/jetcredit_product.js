@@ -249,6 +249,9 @@
     const monthlyEl = widgetEl.querySelector(".jetcredit-miniMonthly");
     const currEl = widgetEl.querySelector(".jetcredit-miniCurrency");
     const logoBtn = widgetEl.querySelector(".jetcredit-logoBtn");
+    const miniTextSecond = widgetEl.querySelector(".jetcredit-miniTextSecond");
+    const miniMonthlySecond = widgetEl.querySelector(".jetcredit-miniMonthlySecond");
+    const miniCurrencySecond = widgetEl.querySelector(".jetcredit-miniCurrencySecond");
 
     buildModalOnce();
 
@@ -289,20 +292,28 @@
         }
 
         const jetEur = data.settings?.jetEur ?? 0;
-        const { primary } = primarySecondaryByJetEur(jetEur, currency);
+        const { primary, secondary } = primarySecondaryByJetEur(jetEur, currency);
 
         const total = Number(data.context?.total ?? 0);
         const settingsPercent = Number(data.settings?.jetPurcent ?? 0);
         const percent = resolvePercent(data.filters, settingsPercent);
 
-        const fallbackMonths = Number(data.settings?.jetVnoskiDefault ?? 12);
-        const { selected } = normalizeInstallments(data.filters, fallbackMonths);
+        const defaultMonths = Number(data.settings?.jetVnoskiDefault ?? 12);
 
-        const monthly = calcMonthly(total, selected, percent);
+        const monthly = calcMonthly(total, defaultMonths, percent);
 
-        monthsEl.textContent = selected;
+        monthsEl.textContent = defaultMonths;
         monthlyEl.textContent = money2(monthly);
-        currEl.textContent = (primary || currency) === "EUR" ? "€" : "лв.";
+        currEl.textContent = (primary || currency) === "EUR" ? "евро" : "лв.";
+
+        if (secondary) {
+          miniTextSecond.style.display = "";
+          const monthlySec = convert(monthly, primary || currency, secondary);
+          miniMonthlySecond.textContent = money2(monthlySec);
+          miniCurrencySecond.textContent = (secondary) === "EUR" ? "евро" : "лв.";
+        } else {
+          miniTextSecond.style.display = "none";
+        }
 
         inline.hidden = false;
 

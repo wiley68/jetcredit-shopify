@@ -4,8 +4,11 @@
 
 .jetcredit-inline {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
 }
 
 .jetcredit-logoBtn {
@@ -24,9 +27,16 @@
 
 .jetcredit-miniText {
   color: #01a66c;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 20px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.jetcredit-miniTextSecond {
+  color: #01a66c;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 16px;
 }
 
 .jetcredit-error {
@@ -137,4 +147,14 @@
 .jetcredit-btn.secondary {
   background: #e5e7eb;
   color: #111827;
+}
+.jet_button_div_txt {
+	width: 100% !important;
+	font-family: 'Roboto Condensed', sans-serif !important;
+	font-size: 18px !important;
+	font-weight: 600 !important;
+	text-align: center !important;
+	line-height: 20px !important;
+	background-color: transparent !important;
+	color: #01A66C !important;
 }
