@@ -1,0 +1,25 @@
+{% assign product_gid = 'gid://shopify/Product/' | append: product.id %}
+
+<div
+  class="jetcredit-root"
+  data-jetcredit-root
+  data-product-gid="{{ product_gid }}"
+  data-shop-domain="{{ shop.permanent_domain }}"
+  data-currency="{{ cart.currency.iso_code | default: shop.currency }}"
+>
+  <button type="button" class="jetcredit-btn" data-jetcredit-open>
+    <img src="{{ 'thumbs-up.png' | asset_url }}" alt="PB Credit" class="jetcredit-logo">
+  </button>
+
+  <div class="jetcredit-inline" data-jetcredit-inline style="display:none;">
+    <span data-jetcredit-months></span> x <span data-jetcredit-monthly></span>
+    <span data-jetcredit-monthly-second class="jetcredit-second" style="display:none;"></span>
+  </div>
+</div>
+
+<script type="application/json" data-jetcredit-variants>
+  {{ product.variants | json }}
+</script>
+
+{{ 'jetcredit.css' | asset_url | stylesheet_tag }}
+{{ 'jetcredit.js' | asset_url | script_tag }}
