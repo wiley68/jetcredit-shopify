@@ -1,212 +1,47 @@
 {% comment %}
-  JetCredit Widget (Product Page)
-  Theme-agnostic: does NOT rely on theme DOM.
+  JetCredit Product Widget (Theme App Extension block)
+  Renders button + modal and loads assets.
 {% endcomment %}
 
-{{ 'jetcredit_product.css' | asset_url | stylesheet_tag }}
-{{ 'jetcredit_product.js' | asset_url | script_tag }}
-
 <div
-  id="jetcredit-widget-{{ section.id }}"
-  class="jetcredit-root"
-  data-section-id="{{ section.id }}"
+  class="jetcredit-widget"
+  data-jetcredit
   data-shop-domain="{{ shop.permanent_domain }}"
-  data-currency="{{ cart.currency.iso_code }}"
-  data-money-format="{{ shop.money_format | escape }}"
-  data-default-months="{{ block.settings.default_months }}"
-  data-min-price="{{ block.settings.min_price }}"
 >
-  {%- comment -%}
-    Product JSON for calculations (variants, prices, etc.)
-  {%- endcomment -%}
+  <div class="jetcredit-inline" hidden>
+    <button type="button" class="jetcredit-logoBtn" aria-label="JetCredit">
+      <img
+        class="jetcredit-logo"
+        src="{{ 'jet.png' | asset_url }}"
+        alt="JetCredit"
+        loading="lazy"
+        width="24"
+        height="24"
+      >
+    </button>
+
+    <div class="jetcredit-miniText">
+      <span class="jetcredit-miniMonths">–</span> x
+      <span class="jetcredit-miniMonthly">–</span>
+      <span class="jetcredit-miniCurrency"></span>
+    </div>
+  </div>
+
+  <div class="jetcredit-error" hidden></div>
+
   <script type="application/json" class="jetcredit-product-json">
     {{ product | json }}
   </script>
-
-  <div class="jetcredit-inline">
-    <div class="jetcredit-title">
-      {{ block.settings.title_text }}
-    </div>
-
-    <div class="jetcredit-logo-row">
-      <button type="button" class="jet_btn jetcredit-open" aria-haspopup="dialog">
-        <img
-          class="jet_logo"
-          src="{{ 'thumbs-up.png' | asset_url }}"
-          alt="Кредитен модул ПБ Лични Финанси"
-        >
-      </button>
-    </div>
-
-    <div class="jetcredit-summary">
-      <p class="jetcredit-summary-text">
-        <span class="jetcredit-months">–</span> x <span class="jetcredit-monthly">–</span>
-        <span class="jetcredit-currency-sign">–</span>
-      </p>
-    </div>
-  </div>
-
-  <!-- Popup -->
-  <div class="modalpayment_jet jetcredit-modal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modalpayment-content_jet">
-      <div class="jet_body">
-        <div class="jet_PopUp_Detailed_v1">
-          <div class="jet_Mask">
-            <div class="jetcredit-step jetcredit-step-1">
-              <div class="jet_row">
-                <div class="jet_column_left">Първоначална вноска</div>
-                <div class="jet_column_right">
-                  <input class="jet_input_text_active jetcredit-downpayment" type="number" min="0" value="0">
-                  <button type="button" class="jet_button_preizcisli jetcredit-recalc">Преизчисли</button>
-                </div>
-              </div>
-
-              <div class="jet_row">
-                <div class="jet_column_left">Цена на стоките</div>
-                <div class="jet_column_right">
-                  <div class="jet_input_text jet_disable">
-                    <div><span class="jetcredit-total">–</span></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="jet_row">
-                <div class="jet_column_left">Брой погасителни вноски</div>
-                <div class="jet_column_right">
-                  <select class="jet_input_text jetcredit-months-select">
-                    {% for m in block.settings.allowed_months | split: '_' %}
-                      <option value="{{ m | strip }}">{{ m | strip }} месеца</option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div>
-
-              <div class="jet_row">
-                <div class="jet_column_left">Общ размер на кредита</div>
-                <div class="jet_column_right">
-                  <div class="jet_input_text jet_disable">
-                    <div><span class="jetcredit-credit-total">–</span></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="jet_row">
-                <div class="jet_column_left">Месечна вноска</div>
-                <div class="jet_column_right">
-                  <div class="jet_input_text jet_disable">
-                    <div><span class="jetcredit-monthly-popup">–</span></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="jet_row">
-                <div class="jet_column_left">Фикс ГПР (%)</div>
-                <div class="jet_column_right">
-                  <div class="jet_input_text jet_disable">
-                    <div><span class="jetcredit-apr">–</span></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="jet_row">
-                <div class="jet_column_left">ГЛП (%)</div>
-                <div class="jet_column_right">
-                  <div class="jet_input_text jet_disable">
-                    <div><span class="jetcredit-interest">–</span></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="jet_hr"></div>
-
-              <div class="jet_row_footer">
-                <div style="padding-bottom: 5px;">
-                  <input type="checkbox" class="jet_uslovia jetcredit-tos">
-                  &nbsp;&nbsp;&nbsp;
-                  <a href="{{ block.settings.tos_url }}" class="jet_uslovia_a" target="_blank">
-                    <span style="font-size: 14px;">Запознах се с условията за кандидатстване</span>
-                  </a>
-                </div>
-                <div>
-                  <input type="checkbox" class="jet_uslovia jetcredit-gdpr">
-                  &nbsp;&nbsp;&nbsp;
-                  <a href="{{ block.settings.gdpr_url }}" class="jet_uslovia_a" target="_blank">
-                    <span style="font-size: 14px;">GDPR информация</span>
-                  </a>
-                </div>
-              </div>
-
-              <div class="jet_row_bottom">
-                <button type="button" class="jet_btn jetcredit-cancel">Откажи</button>
-                <button type="button" class="jet_btn jetcredit-save" style="opacity:0.5;" disabled>Запази избор</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
+
+{{ 'jetcredit_product.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'jetcredit_product.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
   "name": "JetCredit widget",
   "target": "section",
-  "settings": [],
-  "blocks": [
-    {
-      "type": "jetcredit",
-      "name": "JetCredit",
-      "settings": [
-        {
-          "type": "text",
-          "id": "title_text",
-          "label": "Текст над бутона",
-          "default": "Купи на изплащане с ПБ Лични Финанси"
-        },
-        {
-          "type": "text",
-          "id": "allowed_months",
-          "label": "Разрешени месеци (underscore)",
-          "default": "3_6_9_12_15_18_24_30_36"
-        },
-        {
-          "type": "text",
-          "id": "default_months",
-          "label": "Месеци по подразбиране",
-          "default": "12"
-        },
-        {
-          "type": "number",
-          "id": "min_price",
-          "label": "Минимална цена",
-          "default": 250
-        },
-        {
-          "type": "url",
-          "id": "tos_url",
-          "label": "Условия URL",
-          "default": "https://www.postbank.bg/common-conditions-PFBG"
-        },
-        {
-          "type": "url",
-          "id": "gdpr_url",
-          "label": "GDPR URL",
-          "default": "https://www.postbank.bg/Personal-Data-PFBG-retailers"
-        }
-      ]
-    }
-  ],
-  "presets": [
-    {
-      "name": "JetCredit widget",
-      "blocks": [{ "type": "jetcredit" }]
-    }
-  ]
+  "settings": []
 }
 {% endschema %}

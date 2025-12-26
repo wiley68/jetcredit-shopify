@@ -1,5 +1,7 @@
+/* global process */
+
 import crypto from "crypto";
-import { json } from "@react-router/node";
+import { Buffer } from "buffer";
 
 import { getSettings } from "../models/Settings.server";
 import { getActiveFilters } from "../models/Filters.server";
@@ -163,25 +165,31 @@ async function handleCalc(request) {
   const devBypass = url.searchParams.get("dev") === "1";
 
   if (!secret) {
-    return json({ ok: false, error: "Missing SHOPIFY_API_SECRET" }, { status: 500 });
+    return new Response(JSON.stringify({ ok: false, error: "Missing SHOPIFY_API_SECRET" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const hasValidSig = verifyAppProxySignature(request.url, secret);
 
   if (isProd && !hasValidSig) {
-    return json({ ok: false, error: "Invalid proxy signature" }, { status: 401 });
+    return new Response(JSON.stringify({ ok: false, error: "Invalid proxy signature" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   if (!isProd && !hasValidSig && !(allowDevBypass && devBypass)) {
     // In dev, App Proxy signatures are often missing if you call the app host directly.
-    return json(
-      {
-        ok: false,
-        error:
-          "Missing/invalid App Proxy signature. In dev, call via the shop domain App Proxy, or set ALLOW_PROXY_DEV_BYPASS=1 and add ?dev=1.",
-      },
-      { status: 401 }
-    );
+    return new Response(JSON.stringify({
+      ok: false,
+      error:
+        "Missing/invalid App Proxy signature. In dev, call via the shop domain App Proxy, or set ALLOW_PROXY_DEV_BYPASS=1 and add ?dev=1.",
+    }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // --- INPUTS ---
@@ -203,16 +211,28 @@ async function handleCalc(request) {
   const isCard = url.searchParams.get("card") === "1";
 
   if (!Number.isFinite(price) || price <= 0) {
-    return json({ ok: false, error: "Invalid price" }, { status: 400 });
+    return new Response(JSON.stringify({ ok: false, error: "Invalid price" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   if (!Number.isFinite(quantity) || quantity < 1) {
-    return json({ ok: false, error: "Invalid quantity" }, { status: 400 });
+    return new Response(JSON.stringify({ ok: false, error: "Invalid quantity" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   if (!Number.isFinite(downPayment) || downPayment < 0) {
-    return json({ ok: false, error: "Invalid downPayment" }, { status: 400 });
+    return new Response(JSON.stringify({ ok: false, error: "Invalid downPayment" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   if (!Number.isFinite(months) || months < 1 || months > 60) {
-    return json({ ok: false, error: "Invalid months" }, { status: 400 });
+    return new Response(JSON.stringify({ ok: false, error: "Invalid months" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // --- SETTINGS ---
@@ -282,7 +302,7 @@ async function handleCalc(request) {
   const secondMonthly = computeSecondCurrency(monthlyRounded, jetEur);
   const secondTotalPaid = computeSecondCurrency(totalPaid, jetEur);
 
-  return json({
+  return new Response(JSON.stringify({
     ok: true,
 
     // gating
@@ -322,6 +342,8 @@ async function handleCalc(request) {
     // debug/promo info (safe)
     matchedFilterId: chosenFilter?.id ?? null,
     matchedFilterProductId: chosenFilter?.jetProductId ?? null,
+  }), {
+    headers: { "Content-Type": "application/json" },
   });
 }
 

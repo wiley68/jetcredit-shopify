@@ -8,7 +8,7 @@
   data-currency="{{ cart.currency.iso_code | default: shop.currency }}"
 >
   <button type="button" class="jetcredit-btn" data-jetcredit-open>
-    <img src="{{ 'thumbs-up.png' | asset_url }}" alt="PB Credit" class="jetcredit-logo">
+    <img src="{{ 'thumbs-up.png' | asset_url }}" alt="PB Credit" class="jetcredit-logo" width="24" height="24">
   </button>
 
   <div class="jetcredit-inline" data-jetcredit-inline style="display:none;">
@@ -22,4 +22,40 @@
 </script>
 
 {{ 'jetcredit.css' | asset_url | stylesheet_tag }}
-{{ 'jetcredit.js' | asset_url | script_tag }}
+<script src="{{ 'jetcredit.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "JetCredit",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title_text",
+      "label": "Текст над бутона",
+      "default": "Купи на изплащане с ПБ Лични Финанси"
+    },
+    {
+      "type": "text",
+      "id": "allowed_months",
+      "label": "Разрешени месеци (underscore)",
+      "default": "3_6_9_12_15_18_24_30_36"
+    },
+    {
+      "type": "text",
+      "id": "default_months",
+      "label": "Месеци по подразбиране",
+      "default": "12"
+    },
+    {
+      "type": "range",
+      "id": "min_price",
+      "label": "Минимална цена за показване",
+      "min": 0,
+      "max": 500,
+      "step": 10,
+      "default": 100
+    }
+  ]
+}
+{% endschema %}
