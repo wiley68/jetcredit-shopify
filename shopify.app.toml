@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "238e5f9ddc08662bd064de09077fb42b"
+client_id = "7c4d55b23a53abb8e4b14122b353e6fc"
 name = "jetcredit"
 application_url = "https://example.com"
 embedded = true
@@ -12,22 +12,14 @@ include_config_on_deploy = true
 [webhooks]
 api_version = "2026-01"
 
-  [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
-
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,write_app_proxy,read_orders,write_orders,read_customers,write_customers"
+scopes = "read_customers,read_orders,write_app_proxy,write_customers,write_orders,write_products"
 
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
 
 [app_proxy]
-prefix = "apps"
-subpath = "jetcredit"
 url = "/proxy"
+subpath = "jetcredit"
+prefix = "apps"
