@@ -439,6 +439,10 @@
         return fallback;
       }
 
+      let currentPercent = 0;
+      let currentTotalPrimary = 0;
+      let currentPrimaryCur = "BGN";
+
       function recalc() {
         const months = ensureAllowedSelected();
 
@@ -450,12 +454,16 @@
 
         const settingsPercent = Number(lastData.settings?.jetPurcent ?? 0);
         const percent = percentForMonth(lastData.filters, settingsPercent, months);
+        currentPercent = percent;
 
         const monthlyStore = calcMonthly(creditStore, months, percent);
         const totalPayStore = monthlyStore * months;
         const { gpr, glp } = calcGprGlp(creditStore, months, monthlyStore);
+        currentPrimaryCur = pCur;
 
         const totalPrimaryX = convert(totalStore, currency || pCur, pCur);
+        currentTotalPrimary = totalPrimaryX;
+
         const creditPrimary = convert(creditStore, currency || pCur, pCur);
         const monthlyPrimary = convert(monthlyStore, currency || pCur, pCur);
         const totalPayPrimary = convert(totalPayStore, currency || pCur, pCur);
@@ -496,21 +504,19 @@
 
       // Buy action (for now dispatch event + close modal)
       buyBtn.onclick = () => {
-        console.log("buyBtn.onclick");
         if (buyBtn.disabled) return;
 
         // ensure latest numbers
         recalc();
 
-        document.dispatchEvent(new CustomEvent("jetcredit:buy", {
-          detail: {
-            months: parseInt(monthsSel.value, 10) || 12,
-            downPayment: Math.max(0, Number(parvaEl.value || 0)),
-            // you already have lastData with product/variant/total etc
-            context: lastData?.context || null,
-            settings: lastData?.settings || null
-          }
-        }));
+        jetStartCheckoutFromModal({
+          months: ensureAllowedSelected(),
+          downPayment: Math.max(0, Number(parvaEl.value || 0)),
+          primaryTotal: currentTotalPrimary,
+          primaryCur: currentPrimaryCur,
+          percent: currentPercent,
+          card: false
+        });
 
         // close modal
         overlay.classList.remove("is-open");
@@ -534,6 +540,32 @@
 
     refresh();
   }
+
+  async function jetSetCartAttributes(attrs) {
+    const res = await fetch("/cart/update.js", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attributes: attrs }),
+    });
+    if (!res.ok) throw new Error(`cart/update failed: ${res.status}`);
+    return res.json();
+  }
+
+  async function jetStartCheckoutFromModal(payload) {
+    // payload = {months, down, primaryTotal, primaryCur, percent, card}
+    await jetSetCartAttributes({
+      jetcredit_enabled: "1",
+      jet_months: String(payload.months),
+      jet_down: String(payload.down),
+      jet_total_primary: String(payload.primaryTotal),
+      jet_currency_primary: String(payload.primaryCur),
+      jet_percent: String(payload.percent),
+      jet_card: payload.card ? "1" : "0",
+    });
+
+    window.location.href = "/checkout";
+  }
+
 
   function initAll() {
     document.querySelectorAll("[data-jetcredit]").forEach(initOne);
