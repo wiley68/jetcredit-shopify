@@ -184,17 +184,45 @@
 
             <div class="jetcredit-rowLabel">Обща стойност на плащанията <span name="jc_currencyTwo"></span></div>
             <input class="jetcredit-input jetcredit-readonly" id="jc_totalPay" type="text" readonly>
+
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="jet_hr"></div>
+
+        <!-- Checkboxes Container -->
+        <div class="jet_checkboxes_container">
+          <!-- Checkbox 1 -->
+          <div>
+            <input type="checkbox" class="jet_uslovia" id="jet_uslovia">
+            <label for="jet_uslovia">
+              <a class="jet_uslovia_a" href="https://www.postbank.bg/common-conditions-PFBG" target="_blank" rel="noopener">
+                Запознах се с условията за кандидатстване на ПБ Лични финанси
+              </a>
+            </label>
+          </div>
+
+          <!-- Checkbox 2 -->
+          <div>
+            <input type="checkbox" class="jet_uslovia" id="jet_uslovia1">
+            <label for="jet_uslovia1">
+              <a class="jet_uslovia_a" href="https://www.postbank.bg/Personal-Data-PFBG-retailers" target="_blank" rel="noopener">
+                "GDPR" означава Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО
+              </a>
+            </label>
           </div>
         </div>
 
         <div class="jetcredit-modalFooter">
           <div class="jetcredit-footer">
             <button type="button" class="jetcredit-btn secondary" id="jc_cancel">Откажи</button>
-            <button type="button" class="jetcredit-btn" id="jc_recalc">Преизчисли</button>
+            <button type="button" class="jetcredit-btn" id="jc_buy" style="opacity: 0.5;" disabled>Купи на изплащане</button>
           </div>
         </div>
       </div>
     `;
+
     document.body.appendChild(overlay);
 
     const close = () => overlay.classList.remove("is-open");
@@ -229,7 +257,7 @@
     const product = parseProductJson(widgetEl);
     if (!product) return;
 
-    const inline = widgetEl.querySelector(".jetcredit-inline");
+    const inline = widgetEl.querySelector("#jet-product-button-container") || widgetEl.querySelector(".jetcredit-inline");
     const errBox = widgetEl.querySelector(".jetcredit-error");
     const monthsEl = widgetEl.querySelector(".jetcredit-miniMonths");
     const monthlyEl = widgetEl.querySelector(".jetcredit-miniMonthly");
@@ -245,9 +273,22 @@
     let lastController = null;
     let lastData = null;
 
+
+    function hideInline() {
+      inline.hidden = true;
+      inline.style.display = "none";
+    }
+
+    function showInline() {
+      inline.hidden = false;
+      inline.style.display = "";
+    }
+
     async function refresh() {
       errBox.hidden = true;
       errBox.textContent = "";
+
+      hideInline();
 
       const currency = getCurrency();
       const qty = getQty();
@@ -273,7 +314,14 @@
         lastData = data;
 
         if (!data?.visible) {
-          inline.hidden = true;
+          hideInline();
+
+          // по желание: чистим текста, за да не остава "- x -"
+          monthsEl.textContent = "–";
+          monthlyEl.textContent = "–";
+          currEl.textContent = "";
+          if (miniTextSecond) miniTextSecond.style.display = "none";
+
           return;
         }
 
@@ -307,9 +355,9 @@
           miniTextSecond.style.display = "none";
         }
 
-        inline.hidden = false;
+        showInline();
       } catch (e) {
-        inline.hidden = true;
+        hideInline();
         errBox.hidden = false;
         errBox.textContent = `jetcredit: proxy fetch failed (${e.message})`;
         console.error("jetcredit: proxy fetch failed", e);
@@ -332,6 +380,9 @@
       const totalPayOut = overlay.querySelector("#jc_totalPay");
       const gprOut = overlay.querySelector("#jc_gpr");
       const glpOut = overlay.querySelector("#jc_glp");
+      const cb1 = overlay.querySelector("#jet_uslovia");
+      const cb2 = overlay.querySelector("#jet_uslovia1");
+      const buyBtn = overlay.querySelector("#jc_buy");
 
       const currency = getCurrency();
       const jetEur = lastData.settings?.jetEur ?? 0;
@@ -424,11 +475,45 @@
         glpOut.value = money2(glp);
       }
 
-      overlay.querySelector("#jc_recalc").onclick = recalc;
       monthsSel.onchange = recalc;
       parvaEl.oninput = () => {
         window.clearTimeout(parvaEl._t);
         parvaEl._t = window.setTimeout(recalc, 150);
+      };
+
+      // reset checkboxes on every open
+      cb1.checked = false;
+      cb2.checked = false;
+
+      function updateBuyState() {
+        buyBtn.disabled = !(cb1.checked && cb2.checked);
+        buyBtn.style.opacity = buyBtn.disabled ? "0.5" : "1";
+      }
+
+      cb1.onchange = updateBuyState;
+      cb2.onchange = updateBuyState;
+      updateBuyState();
+
+      // Buy action (for now dispatch event + close modal)
+      buyBtn.onclick = () => {
+        console.log("buyBtn.onclick");
+        if (buyBtn.disabled) return;
+
+        // ensure latest numbers
+        recalc();
+
+        document.dispatchEvent(new CustomEvent("jetcredit:buy", {
+          detail: {
+            months: parseInt(monthsSel.value, 10) || 12,
+            downPayment: Math.max(0, Number(parvaEl.value || 0)),
+            // you already have lastData with product/variant/total etc
+            context: lastData?.context || null,
+            settings: lastData?.settings || null
+          }
+        }));
+
+        // close modal
+        overlay.classList.remove("is-open");
       };
 
       recalc();
